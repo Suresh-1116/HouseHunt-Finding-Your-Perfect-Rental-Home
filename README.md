@@ -1,7 +1,7 @@
 <div align="center">
 <img src="https://img.icons8.com/fluency/96/home--v1.png" alt="HouseHunt Logo" width="96"/>
-
-  #  HouseHunt — Finding Your Perfect Rental Home
+  
+#  HouseHunt — Finding Your Perfect Rental Home
  
 **A modern full-stack web application to search, list, and discover rental properties with ease.**
  
@@ -11,7 +11,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 [![GitHub Stars](https://img.shields.io/github/stars/Suresh-1116/HouseHunt-Finding-Your-Perfect-Rental-Home?style=for-the-badge&color=yellow)](https://github.com/Suresh-1116/HouseHunt-Finding-Your-Perfect-Rental-Home/stargazers)
  
-[ Live Demo](#) &nbsp;•&nbsp; [📖 Documentation](#table-of-contents) &nbsp;•&nbsp; [ Report Bug](https://github.com/Suresh-1116/HouseHunt-Finding-Your-Perfect-Rental-Home/issues) &nbsp;•&nbsp; [💡 Request Feature](https://github.com/Suresh-1116/HouseHunt-Finding-Your-Perfect-Rental-Home/issues)
+[ Documentation](#table-of-contents) &nbsp;•&nbsp; [🐛 Report Bug](https://github.com/Suresh-1116/HouseHunt-Finding-Your-Perfect-Rental-Home/issues) &nbsp;•&nbsp; [ Request Feature](https://github.com/Suresh-1116/HouseHunt-Finding-Your-Perfect-Rental-Home/issues)
  
 </div>
 ---
@@ -43,14 +43,15 @@
  
 ##  Features
  
--  **Search & Filter** — Browse rental listings with powerful filters (location, price, bedrooms, etc.)
--  **Property Listings** — Landlords can post detailed rental property information
--  **Image Uploads** — Support for property photos to give tenants a clear view
--  **User Authentication** — Secure login & registration for both tenants and owners
--  **Responsive Design** — Fully optimized for mobile, tablet, and desktop
--  **Location-Based Search** — Find rentals near you or in any city
--  **Contact Owner** — Reach out to property owners directly from the listing
--  **Secure & Scalable** — Built with security best practices in mind
+-  **3-Role System** — Separate flows for Admin, Property Owners, and Tenants
+-  **Auth System** — Register, Login, Forgot Password with JWT & bcryptjs
+-  **Property Management** — Owners can add, update, delete, and view their listings
+-  **Image Uploads** — Property photos uploaded via Multer
+-  **Booking System** — Tenants book properties; Owners approve or reject
+-  **Admin Panel** — Admins manage users, grant/revoke Owner access, view all data
+-  **Protected Routes** — JWT middleware guards all sensitive endpoints
+-  **Availability Tracking** — Property status auto-updates on booking approval
+-  **Responsive Design** — Optimized for mobile, tablet, and desktop
 ---
  
 ##  Tech Stack
@@ -60,18 +61,21 @@
 |---|---|
 | React.js | UI Component Library |
 | CSS3 | Styling & Responsive Design |
-| HTML5 | Markup |
-| Axios | HTTP Client |
+| Axios | HTTP Client for API calls |
  
 ### Backend
 | Technology | Purpose |
 |---|---|
 | Node.js | Runtime Environment |
 | Express.js | Web Framework |
-| MongoDB | Database |
+| MongoDB | NoSQL Database |
 | Mongoose | ODM for MongoDB |
-| JWT | Authentication |
-| bcrypt | Password Hashing |
+| JWT (jsonwebtoken) | Authentication tokens |
+| bcryptjs | Password hashing |
+| Multer | Property image uploads |
+| dotenv | Environment variable management |
+| cors | Cross-Origin Resource Sharing |
+| nodemon | Auto-restart during development |
  
 ---
  
@@ -135,9 +139,9 @@ npm install
 Create a `.env` file in the `backend/` folder:
  
 ```env
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret_key
+PORT=8001
+MONGO_DB=your_mongodb_connection_string
+JWT_KEY=your_jwt_secret_key
 ```
  
 ### Running the App
@@ -162,25 +166,47 @@ The app will be live at `http://localhost:3000` 🎉
  
 ##  Screenshots
  
-> _Add screenshots of your app here to give visitors a visual preview._
+
  
 | Home Page | Property Listing | Search Results |
 |---|---|---|
-| _(screenshot)_ | _(screenshot)_ | _(screenshot)_ |
+| _(<img width="1895" height="915" alt="Screenshot 2026-04-26 133010" src="https://github.com/user-attachments/assets/9a5975d8-997c-4033-8fcb-b6a3d2500029" />
+)_ | _(<img width="1898" height="912" alt="Screenshot 2026-04-26 133056" src="https://github.com/user-attachments/assets/e489ec26-963c-4d96-8d61-bae619933052" />
+)_ | _(<img width="1919" height="915" alt="Screenshot 2026-04-26 133108" src="https://github.com/user-attachments/assets/6a64f478-3c29-4dc5-b2b3-48ab14bb0464" />
+)_ |
  
 ---
  
 ##  API Endpoints
  
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/auth/register` | Register a new user |
-| `POST` | `/api/auth/login` | Login and get JWT token |
-| `GET` | `/api/properties` | Get all property listings |
-| `GET` | `/api/properties/:id` | Get a single property by ID |
-| `POST` | `/api/properties` | Create a new property listing |
-| `PUT` | `/api/properties/:id` | Update a property listing |
-| `DELETE` | `/api/properties/:id` | Delete a property listing |
+###  User Routes (`/api/user`)
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `POST` | `/api/user/register` | ❌ | Register as Tenant or Owner |
+| `POST` | `/api/user/login` | ❌ | Login and receive JWT token |
+| `POST` | `/api/user/forgotpassword` | ❌ | Reset account password |
+| `POST` | `/api/user/getuserdata` | ✅ | Get logged-in user profile |
+| `GET` | `/api/user/getAllProperties` | ❌ | Fetch all available listings |
+| `POST` | `/api/user/bookinghandle/:propertyid` | ✅ | Book a property |
+| `GET` | `/api/user/getallbookings` | ✅ | Get tenant's own bookings |
+ 
+###  Owner Routes (`/api/owner`)
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `POST` | `/api/owner/postproperty` | ✅ | Add a new property listing |
+| `GET` | `/api/owner/getallproperties` | ✅ | Get owner's own properties |
+| `PATCH` | `/api/owner/updateproperty/:propertyid` | ✅ | Update a property |
+| `DELETE` | `/api/owner/deleteproperty/:propertyid` | ✅ | Delete a property |
+| `GET` | `/api/owner/getallbookings` | ✅ | View bookings for owner's properties |
+| `POST` | `/api/owner/handlebookingstatus` | ✅ | Approve or reject a booking |
+ 
+###  Admin Routes (`/api/admin`)
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `GET` | `/api/admin/getallusers` | ✅ | Get all registered users |
+| `POST` | `/api/admin/handlestatus` | ✅ | Grant/revoke Owner access |
+| `GET` | `/api/admin/getallproperties` | ✅ | View all properties platform-wide |
+| `GET` | `/api/admin/getallbookings` | ✅ | View all bookings platform-wide |
  
 ---
  
@@ -210,8 +236,9 @@ Project Link: [https://github.com/Suresh-1116/HouseHunt-Finding-Your-Perfect-Ren
 ---
  
 <div align="center">
-Made with  by <a href="https://github.com/Suresh-1116">Suresh</a>
+Made with ❤️ by <a href="https://github.com/Suresh-1116">Suresh</a>
  
  Star this repo if you found it helpful!
  
 </div>
+ 
